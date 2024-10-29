@@ -12,13 +12,14 @@ def main():
     bg_img = pg.image.load("fig/pg_bg2.jpg")
     road_img = pg.image.load("fig/road.jpg")
     tmr = 0
+    obj_speed = 0
     bg_speed = 1.0 # 初期の速度
     diff_spd = 0.0001 # 加速度
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: return
-        bg_y = (tmr//2%800) # 背景速度 = roadの1/2
-        ro_y = (tmr%800)  # 道の速度 デフォルト
+        bg_y = (obj_speed//2%800) # 背景速度 = roadの1/2
+        ro_y = (obj_speed%800)  # 道の速度 デフォルト
 
         # 背景画像のループ
         screen.blit(bg_img, [0, bg_y]) # 自身に別のSurdaceを貼り付ける
@@ -27,7 +28,7 @@ def main():
         screen.blit(road_img, [75, ro_y-800])
         pg.display.update()
         bg_speed += diff_spd # 背景の速度に加速度を足す
-        tmr += bg_speed # tmrに背景の速度を加算する
+        obj_speed += bg_speed # obj_speedに背景の速度を加算する
         clock.tick(200)
 
 
