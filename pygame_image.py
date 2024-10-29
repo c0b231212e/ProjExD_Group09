@@ -6,6 +6,7 @@ from random import randint
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+
 class Block_Rock:
     """障害物(岩)を生成するクラス"""
     def __init__(self, x, y=-200):
@@ -26,6 +27,7 @@ class Block_Rock:
         """障害物が画面の下に出たかを判定する"""
         return self.y > 800  # y座標が800を超えたら画面外と判定
     
+
 class Block_Logg:
     """障害物(丸太)を生成するクラス"""
     def __init__(self, y=-200):  # 初期位置は画面の上に設定
@@ -51,28 +53,37 @@ def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((600, 800))
     clock = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg")
+    bg_img = pg.image.load("fig/pg_bg2.jpg")
+    road_img = pg.image.load("fig/road.jpg")
     tmr = 0
+    obj_speed = 0
+    bg_speed = 1.0 # 初期の速度
+    diff_spd = 0.0001 # 加速度
     logg = None
     last_logg_time = time.time()  # 最後に丸太を生成した時刻
     flag_num = 0
-
     # 複数の障害物を保持するリスト
     blocks = [Block_Rock(randint(0, 2)) for _ in range(3)]  # 初期障害物を3つ生成
-
     while True:
         for event in pg.event.get():
-            if event.type == pg.QUIT: 
-                return
-        screen.blit(bg_img, [0, 0])
+            if event.type == pg.QUIT: return
+        bg_y = (obj_speed//2%800) # 背景速度 = roadの1/2
+        ro_y = (obj_speed%800)  # 道の速度 デフォルト
 
+        # 背景画像のループ
+        screen.blit(bg_img, [0, bg_y]) # 自身に別のSurdaceを貼り付ける
+        screen.blit(bg_img, [0, bg_y-800])
+        screen.blit(road_img, [75, ro_y])
+        screen.blit(road_img, [75, ro_y-800])
+        pg.display.update()
+        bg_speed += diff_spd # 背景の速度に加速度を足す
+        obj_speed += bg_speed # obj_speedに背景の速度を加算する
+        clock.tick(200)
         # 現在の時刻を取得
         current_time = time.time()
-        
         # 丸太の生成（既存の丸太がないときに新しい丸太を追加）
         if logg is None and randint(0, 100) < 3:  # 一定確率で新しい丸太を生成
                 logg = Block_Logg()
-
         # 丸太の更新と描画fig/block_log.png
         if logg:
             logg.update()
