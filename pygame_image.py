@@ -6,7 +6,6 @@ from random import randint
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-
 class Block_Rock:
     """障害物(岩)を生成するクラス"""
     def __init__(self, x, y=-200):
@@ -60,8 +59,8 @@ def main():
     bg_speed = 1.0 # 初期の速度
     diff_spd = 0.0001 # 加速度
     logg = None
-    last_logg_time = time.time()  # 最後に丸太を生成した時刻
-    flag_num = 0
+    # last_logg_time = time.time()  # 最後に丸太を生成した時刻
+    # flag_num = 0
     # 複数の障害物を保持するリスト
     blocks = [Block_Rock(randint(0, 2)) for _ in range(3)]  # 初期障害物を3つ生成
     while True:
