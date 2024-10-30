@@ -102,8 +102,7 @@ def main():
     bg_speed = 1.0 # 初期の速度
     diff_spd = 0.0001 # 加速度
     logg = None
-    #last_logg_time = time.time()  # 最後に丸太を生成した時刻
-    #flag_num = 0
+
     # 複数の障害物を保持するリスト
     blocks = [Block_Rock(randint(0, 2)) for _ in range(3)]  # 初期障害物を3つ生成
     human_TF=[False,False]
@@ -141,12 +140,12 @@ def main():
         screen.blit(bg_img, [0, bg_y-800])
         screen.blit(road_img, [75, ro_y])
         screen.blit(road_img, [75, ro_y-800])
-        #pg.display.update()
+
         bg_speed += diff_spd # 背景の速度に加速度を足す
         obj_speed += bg_speed # obj_speedに背景の速度を加算する
-        clock.tick(200)
+        # clock.tick(200)
         # 現在の時刻を取得
-        #current_time = time.time()
+
         # 丸太の生成（既存の丸太がないときに新しい丸太を追加）
         if logg is None and randint(0, 100) < 3:  # 一定確率で新しい丸太を生成
                 logg = Block_Logg()
