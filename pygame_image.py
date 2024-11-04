@@ -45,7 +45,6 @@ class Human():
                     self.human_plasey=-50
                 self.count+=1
         else:
-            print(y_Flag)
             if y_Flag[1]=="Active":
                 self.count=0
                 y_Flag[1]="Nonactive"
