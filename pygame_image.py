@@ -66,6 +66,10 @@ class Human():
 
 
 class Gorilla:
+    """
+    Dを押すとゴリラが増え
+    Aを押すとゴリラが減る関数
+    """
     gorira = pg.transform.rotozoom(pg.image.load("fig/gorira.png"), 0, 0.5) # ゴリラのサイズ調整は一番後ろの数字をいじる
     gorira_img=pg.transform.flip(gorira, True, False)
     def __init__(self,xy):
@@ -86,6 +90,9 @@ class Gorilla:
             screen.blit(self.img,self.rct)
     
 class Arrow(pg.sprite.Sprite):
+    """
+    槍がランダムな列に投げられる
+    """
     def __init__(self,xy :tuple[int,int]):
         super().__init__()
         self.vx, self.vy = xy
@@ -101,7 +108,6 @@ class Arrow(pg.sprite.Sprite):
         if self.rect.bottom<=0:
             self.kill()
         self.rect.move_ip(0,-self.spped)
-        print(self.rect.center)
         
 
 def main():
