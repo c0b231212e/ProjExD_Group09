@@ -76,14 +76,13 @@ class Human():
                 self.count+=1
         return self.human_plasey, y_Flag
 
-
 class Block_Rock(pg.sprite.Sprite):
     def __init__(self, xy):
         super().__init__()
         self.vx, self.vy = xy
         self.image = pg.transform.rotozoom(pg.image.load("fig/block.png"), 0, 1.0)
         self.rect = self.image.get_rect(center=(self.vx, self.vy))
-        self.speed = 5  # 誤字を修正
+        self.speed = 4  # 誤字を修正
 
     def update(self):
         self.rect.centery += self.speed  # 下に移動
@@ -116,10 +115,9 @@ class Gorilla(pg.sprite.Sprite):
         self.rect.centery=700
         self.count=0
 
-
     def update(self):
         self.count+=1
-        if self.count>=10:
+        if self.count>=60:
             self.kill()
             self.count=0
 
@@ -129,7 +127,7 @@ class Arrow(pg.sprite.Sprite):
         self.vx, self.vy = xy
         self.image = pg.transform.rotozoom(pg.image.load("fig/yari.png"), 0, 0.2)
         self.rect = self.image.get_rect(center=(self.vx, self.vy))
-        self.speed = 5
+        self.speed = 2
 
     def update(self):
         self.rect.centery -= self.speed  # 上に移動
@@ -184,6 +182,32 @@ class BACKGROUND():
         screen.blit(self.road_img, [75, self.ro_y])
         screen.blit(self.road_img, [75, self.ro_y - 800])
 
+class Score:
+    """
+    スコアに関するクラス
+    """
+    def __init__(self):
+        """
+        フォントを設定
+        文字列Surfaceを生成する
+        """
+        self.fonto = pg.font.SysFont("hgp創英角ポップ体",60)
+        self.coler=(0,0,255)
+        self.score=0
+        self.img = self.fonto.render(f"{self.score}",0,self.coler)
+        self.center=(50,800-150)
+
+    def update(self,screen:pg.surface,get=0):#Score.update(?)で？に数字いれる入れたら
+        """
+        現在のスコアを生成
+        スクリーンbilt
+        """
+        self.score+=get
+        self.img=self.fonto.render(f"{self.score}",0,self.coler)
+        self.rct=self.img.get_rect()
+        self.rct.center=(self.center)
+        screen.blit(self.img,self.rct)
+
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((600, 800))
@@ -197,11 +221,10 @@ def main():
     load = BACKGROUND()
     block=pg.sprite.Group()
     terr=pg.sprite.Group()
+    score=Score()
     tmr = 0
     human_TF=[False,False] # 最初が左　後ろが右
     y_Flag=["Default","Default"]
-    #blocks = [Block_Rock(random.randint(0, 2)) for _ in range(3)]
-
 
     while True:
         human_plasex=0
@@ -231,8 +254,6 @@ def main():
                         if y_Flag[1]=="Default":
                             y_Flag[1]="Active"
 
-
-
         #update群
         load.update(screen)
         if tmr%200==0:
@@ -247,9 +268,6 @@ def main():
             block.add(Block_Rock(block_xy))
         if tmr%500==0:
             block.add(Block_Logg())
-
-
-
         arrow.update()
         arrow.draw(screen)
         coin.update()
@@ -262,6 +280,7 @@ def main():
         gorira.draw(screen)
         human_plasey,y_Flag = human.time_(y_Flag)
         human.update(human_plasex,human_plasey,screen)
+        score.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(200)
