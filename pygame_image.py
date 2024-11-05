@@ -89,22 +89,19 @@ class Arrow(pg.sprite.Sprite):
     def __init__(self,xy :tuple[int,int]):
         super().__init__()
         self.vx, self.vy = xy
-        angle = math.degrees(math.atan2(-self.vy, self.vx))
-        self.image = pg.transform.rotozoom(pg.image.load(f"fig/yari.png"), angle, 0.1)
-        self.vx = math.cos(math.radians(angle))
-        self.vy = -math.sin(math.radians(angle))
+        self.image = pg.transform.rotozoom(pg.image.load(f"fig/yari.png"),0, 0.1)
         self.rect = self.image.get_rect()
         self.rect.centery = self.vy
         self.rect.centerx = self.vx
-        self.spped=-10
+        self.spped=10
         self.count=0
     
     def update(self):
         self.arrow_y=-50
         if self.rect.bottom<=0:
             self.kill()
-        self.rect.move_ip(0,self.vy-self.spped)
-        print(self.rect)
+        self.rect.move_ip(0,-self.spped)
+        print(self.rect.center)
         
 
 def main():
