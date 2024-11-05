@@ -1,6 +1,8 @@
 import os
 import sys
 import pygame as pg
+import random
+import math
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -62,8 +64,48 @@ class Human():
                 self.count+=1
         return self.human_plasey, y_Flag
 
-       
+
+class Gorilla:
+    gorira = pg.transform.rotozoom(pg.image.load("fig/gorira.png"), 0, 0.5) # ゴリラのサイズ調整は一番後ろの数字をいじる
+    gorira_img=pg.transform.flip(gorira, True, False)
+    def __init__(self,xy):
+        self.img = __class__.gorira_img
+        self.rct: pg.Rect = self.img.get_rect()
+        self.rct.center=xy
+        self.gori_y=700
+
+    def update(self,screen,count):
+        for i in range(count):
+            if i==1:
+                self.rct.center=(300,self.gori_y)
+            elif i==2:
+                self.rct.center=(420,self.gori_y)
+            elif i==3:
+                self.rct.center=(180,self.gori_y)
+            self.gori_y+=0
+            screen.blit(self.img,self.rct)
     
+class Arrow(pg.sprite.Sprite):
+    def __init__(self,xy :tuple[int,int]):
+        super().__init__()
+        self.vx, self.vy = xy
+        angle = math.degrees(math.atan2(-self.vy, self.vx))
+        self.image = pg.transform.rotozoom(pg.image.load(f"fig/yari.png"), angle, 0.1)
+        self.vx = math.cos(math.radians(angle))
+        self.vy = -math.sin(math.radians(angle))
+        self.rect = self.image.get_rect()
+        self.rect.centery = self.vy
+        self.rect.centerx = self.vx
+        self.spped=-10
+        self.count=0
+    
+    def update(self):
+        self.arrow_y=-50
+        if self.rect.bottom<=0:
+            self.kill()
+        self.rect.move_ip(0,self.vy-self.spped)
+        print(self.rect)
+        
 
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
@@ -73,9 +115,13 @@ def main():
     human_plasex=0
     human_plasey=0
     human = Human((300, 500))
+    gorira_count=0
+    gorira=Gorilla((300,700))
+    arrow=pg.sprite.Group()
     tmr = 0
+    fly=False
     human_TF=[False,False] # 最初が左　後ろが右
-    y_Flag=["Default","Default"]    
+    y_Flag=["Default","Default"]
     while True:
         human_plasex=0
         for event in pg.event.get():
@@ -95,7 +141,12 @@ def main():
                             human_TF[0]=False
                         else:
                             human_TF[1]=True
-                
+                if event.type == pg.KEYDOWN and event.key == pg.K_d:
+                    if gorira_count<=3:
+                        gorira_count+=1
+                if event.type == pg.KEYDOWN and event.key == pg.K_a:
+                    if gorira_count>0:
+                        gorira_count-=1
                 if event.type == pg.KEYDOWN and event.key == pg.K_UP:
                     if y_Flag[1]=="Default":
                         if y_Flag[0]=="Default":
@@ -105,10 +156,15 @@ def main():
                         if y_Flag[1]=="Default":
                             y_Flag[1]="Active"
                         
-
+        if tmr%10==0:
+            arrow_xy=(random.choice([180,300,420]),700)
+            arrow.add(Arrow(arrow_xy))
         screen.blit(bg_img, [0, 0])
         human_plasey,y_Flag = human.time_(y_Flag)
         human.update(human_plasex,human_plasey,screen)
+        gorira.update(screen,gorira_count)
+        arrow.update()
+        arrow.draw(screen)
         pg.display.update()
         tmr += 1        
         clock.tick(10)
