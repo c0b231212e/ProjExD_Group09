@@ -215,7 +215,7 @@ def main():
     arrow=pg.sprite.Group()
     coin=pg.sprite.Group()
     load = BACKGROUND()
-    tmr = 0
+    tmr = 0 #時間
     human_TF=[False,False] # 最初が左　後ろが右
     y_Flag=["Default","Default"]
     #blocks = [Block_Rock(random.randint(0, 2)) for _ in range(3)]
