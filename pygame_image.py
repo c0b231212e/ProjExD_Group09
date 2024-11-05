@@ -45,6 +45,8 @@ class Human():
     def time_(self,y_Flag):
         if y_Flag[0] == "Default":
             if y_Flag[1] =="Defult":
+        if y_Flag[0] == "Default":
+            if y_Flag[1] =="Defult":
                 self.human_plasey=0
         if y_Flag[0]!="Default":
             if y_Flag[0]=="Active":
@@ -69,7 +71,40 @@ class Human():
             if y_Flag[1]=="Nonactive":
                 if self.count>=4:
                     self.human_plasey=0
+        if y_Flag[0]!="Default":
+            if y_Flag[0]=="Active":
+                self.count=0
+                y_Flag[0]="Nonactive"
+            if y_Flag[0]=="Nonactive":
+                if self.count>=60:
+                    self.human_plasey=0
                     self.count=0
+                    y_Flag[0]="Default"
+                elif self.count>=40:
+                    self.human_plasey=3
+                elif self.count>=20:
+                    self.human_plasey=0
+                else:
+                    self.human_plasey=-3
+                self.count+=1
+        else:
+            if y_Flag[1]=="Active":
+                self.count=0
+                y_Flag[1]="Nonactive"
+            if y_Flag[1]=="Nonactive":
+                if self.count>=4:
+                    self.human_plasey=0
+                    self.count=0
+                    y_Flag[1]="Default"
+                elif self.count>=3:
+                    self.human_plasey=-50
+                elif self.count>=2:
+                    self.human_plasey=0
+                elif self.count>=1:
+                    self.human_plasey=50
+                self.count+=1
+        return self.human_plasey, y_Flag
+    
                     y_Flag[1]="Default"
                 elif self.count>=3:
                     self.human_plasey=-50
@@ -260,13 +295,37 @@ def main():
 
         
         human_plasey,y_Flag = human.time_(y_Flag)
+                    if y_Flag[1]=="Default":
+                        if y_Flag[0]=="Default":
+                            y_Flag[0]="Active"
+                elif event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
+                    if y_Flag[0]=="Default":
+                        if y_Flag[1]=="Default":
+                            y_Flag[1]="Active"
+        load.update(screen)
+        if tmr%100==0:
+            arrow_xy=(random.choice([180,300,420]),700)
+            arrow.add(Arrow(arrow_xy))
+            gorira.update(screen,arrow_xy)
+        if tmr%50==0:
+            coin_xy=(random.choice([180,300,420]),0)
+            coin.add(Items(coin_xy))
+        
+
+        
+        human_plasey,y_Flag = human.time_(y_Flag)
         human.update(human_plasex,human_plasey,screen)
+        arrow.update()
+        arrow.draw(screen)
+        coin.update()
+        coin.draw(screen)
         arrow.update()
         arrow.draw(screen)
         coin.update()
         coin.draw(screen)
         pg.display.update()
         tmr += 1        
+        clock.tick(200)
         clock.tick(200)
 
 
