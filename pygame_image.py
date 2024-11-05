@@ -2,7 +2,6 @@ import os
 import sys
 import pygame as pg
 import random
-import math
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -67,27 +66,18 @@ class Human():
 
 class Gorilla:
     """
-    Dを押すとゴリラが増え
-    Aを押すとゴリラが減る関数
+    槍が投げられるときにゴリラが出現する
     """
     gorira = pg.transform.rotozoom(pg.image.load("fig/gorira.png"), 0, 0.5) # ゴリラのサイズ調整は一番後ろの数字をいじる
     gorira_img=pg.transform.flip(gorira, True, False)
-    def __init__(self,xy):
+    def __init__(self):
         self.img = __class__.gorira_img
         self.rct: pg.Rect = self.img.get_rect()
-        self.rct.center=xy
-        self.gori_y=700
 
-    def update(self,screen,count):
-        for i in range(count):
-            if i==1:
-                self.rct.center=(300,self.gori_y)
-            elif i==2:
-                self.rct.center=(420,self.gori_y)
-            elif i==3:
-                self.rct.center=(180,self.gori_y)
-            self.gori_y+=0
-            screen.blit(self.img,self.rct)
+
+    def update(self,screen,arrow):
+        self.rct.center=arrow
+        screen.blit(self.img,self.rct)
     
 class Arrow(pg.sprite.Sprite):
     """
@@ -100,7 +90,7 @@ class Arrow(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centery = self.vy
         self.rect.centerx = self.vx
-        self.spped=10
+        self.spped=5
         self.count=0
     
     def update(self):
@@ -118,11 +108,9 @@ def main():
     human_plasex=0
     human_plasey=0
     human = Human((300, 500))
-    gorira_count=0
-    gorira=Gorilla((300,700))
+    gorira=Gorilla()
     arrow=pg.sprite.Group()
     tmr = 0
-    fly=False
     human_TF=[False,False] # 最初が左　後ろが右
     y_Flag=["Default","Default"]
     while True:
@@ -144,12 +132,6 @@ def main():
                             human_TF[0]=False
                         else:
                             human_TF[1]=True
-                if event.type == pg.KEYDOWN and event.key == pg.K_d:
-                    if gorira_count<=3:
-                        gorira_count+=1
-                if event.type == pg.KEYDOWN and event.key == pg.K_a:
-                    if gorira_count>0:
-                        gorira_count-=1
                 if event.type == pg.KEYDOWN and event.key == pg.K_UP:
                     if y_Flag[1]=="Default":
                         if y_Flag[0]=="Default":
@@ -159,13 +141,13 @@ def main():
                         if y_Flag[1]=="Default":
                             y_Flag[1]="Active"
                         
-        if tmr%10==0:
+        screen.blit(bg_img, [0, 0])
+        if tmr%100==0:
             arrow_xy=(random.choice([180,300,420]),700)
             arrow.add(Arrow(arrow_xy))
-        screen.blit(bg_img, [0, 0])
+            gorira.update(screen,arrow_xy)
         human_plasey,y_Flag = human.time_(y_Flag)
         human.update(human_plasex,human_plasey,screen)
-        gorira.update(screen,gorira_count)
         arrow.update()
         arrow.draw(screen)
         pg.display.update()
