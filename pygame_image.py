@@ -29,14 +29,14 @@ class Human():
     def __init__(self,xy:tuple[int, int]):
         super().__init__()
         self.img = __class__.img
-        self.rct: pg.Rect = self.img.get_rect()
-        self.rct.center = xy
+        self.rect: pg.Rect = self.img.get_rect()
+        self.rect.center = xy
         self.count=0
         self.human_plasey=0
 
     def update(self, human_plasex:int, human_plasey:int,screen: pg.Surface):
-        self.rct.move_ip(human_plasex,human_plasey)
-        screen.blit(self.img, self.rct)
+        self.rect.move_ip(human_plasex,human_plasey)
+        screen.blit(self.img, self.rect)
 
     def time_(self,y_Flag):
         if y_Flag[0] == "Default":
@@ -225,7 +225,7 @@ def main():
     tmr = 0
     human_TF=[False,False] # 最初が左　後ろが右
     y_Flag=["Default","Default"]
-
+    yari_Flag=False
     while True:
         human_plasex=0
         for event in pg.event.get():
@@ -253,13 +253,29 @@ def main():
                     if y_Flag[0]=="Default":
                         if y_Flag[1]=="Default":
                             y_Flag[1]="Active"
-
+                if event.type == pg.KEYDOWN and event.key == pg.K_a:
+                    yari_Flag=True
+                elif event.type == pg.KEYDOWN and event.key == pg.K_d:
+                    yari_Flag=False
+        if len(pg.sprite.spritecollide(human, coin, True)) != 0:
+            score.update(screen,1)
+        if len(pg.sprite.spritecollide(human, block, True)) != 0:
+            gameover(screen)
+            return
+        if len(pg.sprite.spritecollide(human, arrow, True)) != 0:
+            gameover(screen)
+            return
+        if y_Flag == ["Default","Default"]:
+            if len(pg.sprite.spritecollide(human, terr, True)) != 0:
+                gameover(screen)
+                return
         #update群
         load.update(screen)
-        if tmr%200==0:
-            arrow_xy=(random.choice([180,300,420]),700)
-            arrow.add(Arrow(arrow_xy))
-            gorira.add(Gorilla(arrow_xy))
+        if yari_Flag==True:
+            if tmr%1001==0:
+                arrow_xy=(random.choice([180,300,420]),700)
+                arrow.add(Arrow(arrow_xy))
+                gorira.add(Gorilla(arrow_xy))
         if tmr%50==0:
             coin_xy=(random.choice([180,300,420]),0)
             coin.add(Items(coin_xy))
@@ -267,7 +283,7 @@ def main():
             block_xy=(random.choice([180,300,420]),0)
             block.add(Block_Rock(block_xy))
         if tmr%500==0:
-            block.add(Block_Logg())
+            terr.add(Block_Logg())
         arrow.update()
         arrow.draw(screen)
         coin.update()
