@@ -324,7 +324,7 @@ def main():
         coin.update()
         coin.draw(screen)
         pg.display.update()
-        tmr += 1        
+        tmr += 1       #aaaaaa 
         clock.tick(200)
         clock.tick(200)
 
