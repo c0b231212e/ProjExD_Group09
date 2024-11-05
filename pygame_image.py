@@ -149,7 +149,7 @@ class Items(pg.sprite.Sprite):
             self.kill()
 
 
-class BACKGROUND():
+class BackGround():
     """
     背景のスクロール速度と道のスクロール速度の
     制御に関するプログラムを記述
@@ -192,7 +192,7 @@ def main():
     gorira=pg.sprite.Group()
     arrow=pg.sprite.Group()
     coin=pg.sprite.Group()
-    load = BACKGROUND()
+    load = BackGround()
     block=pg.sprite.Group()
     terr=pg.sprite.Group()
     tmr = 0
