@@ -2,51 +2,84 @@ import os
 import sys
 import time
 import pygame as pg
-from random import randint
+import random
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-class Human:
+def gameover(screen):
     """
-    障害物を乗り越える人を表示する。
+    引数screen
+    黒の透過背景にGameOverと出力される関数
     """
+    WIDTH, HEIGHT = screen.get_size()  # 画面サイズを取得
+    surface = pg.Surface((WIDTH, HEIGHT))
+    pg.draw.rect(surface, (0, 0, 0), pg.Rect(0, 0, WIDTH, HEIGHT))
+    surface.set_alpha(128)
+    screen.blit(surface, [0, 0])
+    fonto = pg.font.Font(None, 100)
+    txt = fonto.render("GameOver", True, (255, 255, 255))
+    screen.blit(txt, [WIDTH/2 - 190, HEIGHT/2])
+    pg.display.update()
+    time.sleep(3)
+
+class Human():
+    # delta = {  # 押下キーと移動量の辞書
+    #     pg.K_LEFT: (-50, 0),
+    #     pg.K_RIGHT: (+50, 0),
+    # }
     img0 = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
-    img = pg.transform.flip(img0, True, False)
-    def __init__(self, xy: tuple[int, int]):
+    img=pg.transform.flip(img0, True, False)
+
+    def __init__(self,xy:tuple[int, int]):
         self.img = __class__.img
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
-        self.count=0 #人のｙ軸を変更するために必要なcount
+        self.count=0
+        self.human_plasey=0
 
-    def update(self, human_plasex,human_plasey,screen: pg.Surface):
+    def update(self, human_plasex:int, human_plasey:int,screen: pg.Surface):
         
-        self.rct.move_ip(human_plasex,human_plasey)
+        self.rct.move_ip(human_plasex,human_plasey)        
         screen.blit(self.img, self.rct)
 
     def time_(self,y_Flag):
-            """
-            ｙ軸を変更する際の動きに使用する
-            """
-            if y_Flag == "Default":
+        if y_Flag[0] == "Default":
+            if y_Flag[1] =="Defult":
                 self.human_plasey=0
-            else:
-                if y_Flag=="Active":
+        if y_Flag[0]!="Default":
+            if y_Flag[0]=="Active":
+                self.count=0
+                y_Flag[0]="Nonactive"
+            if y_Flag[0]=="Nonactive":
+                if self.count>=60:
+                    self.human_plasey=0
                     self.count=0
-                    y_Flag="Nonactive"
-                if y_Flag=="Nonactive":
-                    if self.count==1:
-                        self.human_plasey=-50
-                    elif self.count==2:
-                        self.human_plasey=0
-                    elif self.count==3:
-                        self.human_plasey=50
-                    elif self.count>=4:
-                        self.human_plasey=0
-                        y_Flag="Default"
-                    self.count+=1
-            return self.human_plasey, y_Flag
-
-
-
+                    y_Flag[0]="Default"
+                elif self.count>=40:
+                    self.human_plasey=3
+                elif self.count>=20:
+                    self.human_plasey=0
+                else:
+                    self.human_plasey=-3
+                self.count+=1
+        else:
+            if y_Flag[1]=="Active":
+                self.count=0
+                y_Flag[1]="Nonactive"
+            if y_Flag[1]=="Nonactive":
+                if self.count>=4:
+                    self.human_plasey=0
+                    self.count=0
+                    y_Flag[1]="Default"
+                elif self.count>=3:
+                    self.human_plasey=-50
+                elif self.count>=2:
+                    self.human_plasey=0
+                elif self.count>=1:
+                    self.human_plasey=50
+                self.count+=1
+        return self.human_plasey, y_Flag
+    
 class Block_Rock:
     """障害物(岩)を生成するクラス"""
     def __init__(self, x, y=-200):
@@ -66,7 +99,6 @@ class Block_Rock:
     def is_off_screen(self):
         """障害物が画面の下に出たかを判定する"""
         return self.y > 800  # y座標が800を超えたら画面外と判定
-    
 
 class Block_Logg:
     """障害物(丸太)を生成するクラス"""
@@ -88,90 +120,154 @@ class Block_Logg:
         """丸太が画面の下に出たかを判定する"""
         return self.y > 800  # y座標が800を超えたら画面外と判定
 
+class Gorilla:
+    """
+    槍が投げられるときにゴリラが出現する
+    """
+    gorira = pg.transform.rotozoom(pg.image.load("fig/gorira.png"), 0, 0.5) # ゴリラのサイズ調整は一番後ろの数字をいじる
+    gorira_img=pg.transform.flip(gorira, True, False)
+    def __init__(self):
+        self.img = __class__.gorira_img
+        self.rct: pg.Rect = self.img.get_rect()
+
+
+    def update(self,screen,arrow):
+        self.rct.center=arrow
+        screen.blit(self.img,self.rct)
+    
+class Arrow(pg.sprite.Sprite):
+    """
+    槍がランダムな列に投げられる
+    """
+    def __init__(self,xy :tuple[int,int]):
+        super().__init__()
+        self.vx, self.vy = xy
+        self.image = pg.transform.rotozoom(pg.image.load(f"fig/yari.png"),0, 0.1)
+        self.rect = self.image.get_rect()
+        self.rect.centery = self.vy
+        self.rect.centerx = self.vx
+        self.spped=5
+    
+    def update(self):
+        if self.rect.bottom<=0:
+            self.kill()
+        self.rect.move_ip(0,-self.spped)
+
+class Items(pg.sprite.Sprite):
+    """
+    コインがランダムな列に入れる
+    """
+    def __init__(self,xy :tuple[int,int]):
+        super().__init__()
+        self.vx, self.vy = xy
+        self.image = pg.transform.rotozoom(pg.image.load(f"fig/coin.png"),0, 0.1)
+        self.rect = self.image.get_rect()
+        self.rect.centery = self.vy
+        self.rect.centerx = self.vx
+        self.spped=5
+    
+    def update(self):
+        if self.rect.bottom>=800:
+            self.kill()
+        self.rect.move_ip(0,self.spped)
+
+class BACKGROUND():
+    """
+    背景のスクロール速度と道のスクロール速度の
+    制御に関するプログラムを記述
+    """
+    def __init__(self, bg_speed = 1.0, diff_spd = 0.0001):
+        """
+        bg_speed : 背景速度と道の速度にかかわる変数 float型
+        diff_spd : 加速度にかかわる変数 float型
+        """
+        self.bg_img = pg.image.load("fig/pg_bg2.jpg")
+        self.road_img = pg.image.load("fig/road.jpg")
+        self.bg_speed = bg_speed # 背景速度と道の速度にかかわる変数
+        self.diff_spd = diff_spd # 加速度にかかわる変数
+        self.obj_speed = 0 # オブジェクトの速度に関する変数
+        self.bg_y = 0
+        self.ro_y = 0
+
+    def update(self, screen):
+        # 背景と道の速度を更新
+        self.bg_speed += self.diff_spd
+        self.obj_speed += self.bg_speed
+
+        # 背景と道のスクロール位置を更新
+        self.bg_y = (self.bg_y + self.bg_speed / 2) % 800
+        self.ro_y = (self.ro_y + self.bg_speed) % 800
+
+        # 画面に画像を描画
+        screen.blit(self.bg_img, [0, self.bg_y])
+        screen.blit(self.bg_img, [0, self.bg_y - 800])
+        screen.blit(self.road_img, [75, self.ro_y])
+        screen.blit(self.road_img, [75, self.ro_y - 800])
 
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((600, 800))
     clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg2.jpg")
-    road_img=pg.image.load("fig/road.jpg")
     human_plasex=0
-    human=Human((300,500))
+    human_plasey=0
+    human = Human((300, 500))
+    gorira=Gorilla()
+    arrow=pg.sprite.Group()
+    coin=pg.sprite.Group()
+    load = BACKGROUND()
     tmr = 0
-    obj_speed = 0
-    bg_speed = 1.0 # 初期の速度
-    diff_spd = 0.0001 # 加速度
-    logg = None
+    human_TF=[False,False] # 最初が左　後ろが右
+    y_Flag=["Default","Default"]
+    #blocks = [Block_Rock(random.randint(0, 2)) for _ in range(3)]
 
-    # 複数の障害物を保持するリスト
-    blocks = [Block_Rock(randint(0, 2)) for _ in range(3)]  # 初期障害物を3つ生成
-    human_TF=[False,False]
-    y_Flag="Default"
 
     while True:
         human_plasex=0
         for event in pg.event.get():
             if event.type == pg.QUIT: return
             if pg.key.get_pressed():
-                if event.type == pg.KEYDOWN and event.key==pg.K_LEFT:
-                    if human_TF[0] ==False:
+                if event.type == pg.KEYDOWN and event.key == pg.K_LEFT:
+                    if human_TF[0] !=True:
                         human_plasex=-120
                         if human_TF[1]==True:
                             human_TF[1]=False
                         else:
                             human_TF[0]=True
                 if event.type == pg.KEYDOWN and event.key == pg.K_RIGHT:
-                    if human_TF[1] == False:
+                    if human_TF[1] != True:
                         human_plasex=120
                         if human_TF[0]==True:
                             human_TF[0]=False
                         else:
                             human_TF[1]=True
                 if event.type == pg.KEYDOWN and event.key == pg.K_UP:
-                    y_Flag="Active"
-                if event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
-                    human_plasey=50
-        bg_y = (obj_speed//2%800) # 背景速度 = roadの1/2
-        ro_y = (obj_speed%800)  # 道の速度 デフォルト
-            
-
-
-        screen.blit(bg_img, [0, bg_y]) # 自身に別のSurdaceを貼り付ける
-        screen.blit(bg_img, [0, bg_y-800])
-        screen.blit(road_img, [75, ro_y])
-        screen.blit(road_img, [75, ro_y-800])
-
-        bg_speed += diff_spd # 背景の速度に加速度を足す
-        obj_speed += bg_speed # obj_speedに背景の速度を加算する
-        # clock.tick(200)
-        # 現在の時刻を取得
-
-        # 丸太の生成（既存の丸太がないときに新しい丸太を追加）
-        if logg is None and randint(0, 100) < 3:  # 一定確率で新しい丸太を生成
-                logg = Block_Logg()
-        # 丸太の更新と描画fig/block_log.png
-        if logg:
-            logg.update()
-            logg.draw(screen)
-            # 画面外に出たら丸太を削除
-            if logg.is_off_screen():
-                logg = None
-
-        # 障害物の更新と描画
-        for block in blocks:
-            block.update()
-            block.draw(screen)
+                    if y_Flag[1]=="Default":
+                        if y_Flag[0]=="Default":
+                            y_Flag[0]="Active"
+                elif event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
+                    if y_Flag[0]=="Default":
+                        if y_Flag[1]=="Default":
+                            y_Flag[1]="Active"
+        load.update(screen)
+        if tmr%100==0:
+            arrow_xy=(random.choice([180,300,420]),700)
+            arrow.add(Arrow(arrow_xy))
+            gorira.update(screen,arrow_xy)
+        if tmr%50==0:
+            coin_xy=(random.choice([180,300,420]),0)
+            coin.add(Items(coin_xy))
         
-        # 画面外に出た障害物をリストから削除し、新しい障害物を追加
-        blocks = [block for block in blocks if not block.is_off_screen()]
-        if len(blocks) < 2 and randint(0, 100) < 3:  # 最大2個の障害物が常に表示されるように
-            blocks.append(Block_Rock(randint(0, 2)))
 
-        human_plasey,y_Flag=human.time_(y_Flag)
+        
+        human_plasey,y_Flag = human.time_(y_Flag)
         human.update(human_plasex,human_plasey,screen)
+        arrow.update()
+        arrow.draw(screen)
+        coin.update()
+        coin.draw(screen)
         pg.display.update()
         tmr += 1        
-        clock.tick(10)
+        clock.tick(200)
 
 
 if __name__ == "__main__":
